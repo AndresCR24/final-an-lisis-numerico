@@ -37,7 +37,7 @@ def metodo_selected(previous_window, metodo):
         falsa_pos_button = tk.Button(cerrado_window, text="Falsa Posición", command=abrir_falsa_posicion)
         falsa_pos_button.pack()
 
-        biseccion_button = tk.Button(cerrado_window, text="Bisección", command=lambda: print("Bisección seleccionada"))
+        biseccion_button = tk.Button(cerrado_window, text="Bisección", command=abrir_biseccion)
         biseccion_button.pack()
 
         # Agregar botón para regresar
@@ -45,15 +45,21 @@ def metodo_selected(previous_window, metodo):
         regresar_button.pack()
 
     elif metodo == "abierto":
-        # Implementar lógica para método abierto
-        print("Método abierto seleccionado")
+        abierto_window = tk.Toplevel()
+        abierto_window.title("Metodos Abiertos")
+
+        newton_button = tk.Button(abierto_window, text="Newton", command= abrir_newton)
+        newton_button.pack()
+
+        secante_button = tk.Button(abierto_window, text="Secante", command=print("sisas2"))
+        secante_button.pack()
 
 def regresar(main_window, current_window):
     # Cerrar la ventana actual y mostrar la ventana principal
     current_window.destroy()
     main_window.deiconify()
 
-
+#Metodo Cerrado Falsa Posición
 def ejecutar_falsa_posicion(funcion_str, a_val, b_val, tol_val):
     x = sp.symbols('x')
     funcion_str = funcion_str.replace('sp.', '')
@@ -100,9 +106,97 @@ def abrir_falsa_posicion():
 
     resultado_label = tk.Label(falsa_pos_window, text="Resultado:")
     resultado_label.pack()
+#Metodo cerrado Biseccion
+def ejecutar_biseccion(funcion_str, a_val, b_val, tol_val):
+    x = sp.symbols('x')
+    funcion_str = funcion_str.replace('sp.', '')
+
+    try:
+        funcion = lambdify(x, parse_expr(funcion_str))
+        resultado = Biseccion(funcion, a_val, b_val, tol_val)
+        return resultado
+    except Exception as e:
+        return str(e)
 
 
-#----------------------------
+def abrir_biseccion():
+    def comando_ejecutar():
+        funcion_str = funcion_entry.get()
+        a_val = float(intervalo_a_entry.get())
+        b_val = float(intervalo_b_entry.get())
+        tol_val = float(tol_entry.get())
+
+        resultado = ejecutar_biseccion(funcion_str, a_val, b_val, tol_val)
+        resultado_label.config(text=f"Resultado: {resultado}")
+
+    biseccion_window = tk.Toplevel()
+    biseccion_window.title("Bisección")
+
+    tk.Label(biseccion_window, text="Función:").pack()
+    funcion_entry = tk.Entry(biseccion_window, width=50)
+    funcion_entry.pack()
+
+    tk.Label(biseccion_window, text="Intervalo a:").pack()
+    intervalo_a_entry = tk.Entry(biseccion_window, width=50)
+    intervalo_a_entry.pack()
+
+    tk.Label(biseccion_window, text="Intervalo b:").pack()
+    intervalo_b_entry = tk.Entry(biseccion_window, width=50)
+    intervalo_b_entry.pack()
+
+    tk.Label(biseccion_window, text="Tolerancia:").pack()
+    tol_entry = tk.Entry(biseccion_window, width=50)
+    tol_entry.pack()
+
+    ejecutar_button = tk.Button(biseccion_window, text="Ejecutar", command=comando_ejecutar)
+    ejecutar_button.pack()
+
+    resultado_label = tk.Label(biseccion_window, text="Resultado:")
+    resultado_label.pack()
+
+def ejecutar_newton(funcion_str, x0, tol_val):
+    # Convertir la cadena de la función en una función simbólica
+    funcion = sp.sympify(funcion_str)
+
+    # Convertir x0 y tol_val a tipos de datos adecuados si es necesario
+    x0 = float(x0)
+    tol_val = float(tol_val)
+
+    # Llamar al método de Newton de Ceros.py
+    resultado = Newton(funcion, x0, tol_val)
+
+    # Devolver el resultado
+    return resultado
+def abrir_newton():
+    def comando_ejecutar():
+        funcion_str = funcion_entry.get()
+        x0 = float(x0_entry.get())
+        tol_val = float(tol_entry.get())
+
+        resultado = ejecutar_newton(funcion_str, x0, tol_val)
+        resultado_label.config(text=f"Resultado: {resultado}")
+
+    newton_window = tk.Toplevel()
+    newton_window.title("Método de Newton")
+
+    tk.Label(newton_window, text="Función (Colocarla normal directamente sin el sp.):").pack()
+    funcion_entry = tk.Entry(newton_window, width=50)
+    funcion_entry.pack()
+
+    tk.Label(newton_window, text="Valor inicial (x0):").pack()
+    x0_entry = tk.Entry(newton_window, width=50)
+    x0_entry.pack()
+
+    tk.Label(newton_window, text="Tolerancia:").pack()
+    tol_entry = tk.Entry(newton_window, width=50)
+    tol_entry.pack()
+
+    ejecutar_button = tk.Button(newton_window, text="Ejecutar", command=comando_ejecutar)
+    ejecutar_button.pack()
+
+    resultado_label = tk.Label(newton_window, text="Resultado:")
+    resultado_label.pack()
+
 # Crear la ventana principal
 root = tk.Tk()
 root.title("Métodos Numéricos")
