@@ -1,152 +1,115 @@
 import tkinter as tk
-from tkinter import ttk
-from sympy import symbols, sympify, exp, N
+from tkinter import messagebox
 import sympy as sp
+from sympy.parsing.sympy_parser import parse_expr
+from sympy import lambdify, exp
 from Metodos.modelo.Ceros import *
-def open_ceros():
-    # Cerrar la ventana principal
+
+def open_ceros_window():
+    # Ocultar la ventana principal
     root.withdraw()
 
-    # Crear una nueva ventana para los métodos de ceros
+    # Crear una nueva ventana para métodos de ceros
     ceros_window = tk.Toplevel()
     ceros_window.title("Métodos de Ceros")
-    ceros_window.geometry(root.geometry())
 
-    # Crear botones para los métodos cerrado y abierto
-    btn_metodo_cerrado = ttk.Button(ceros_window, text="Método Cerrado", command=lambda: metodo_cerrado(ceros_window))
-    btn_metodo_cerrado.pack(expand=True)
+    # Agregar botones para Método cerrado y Método abierto
+    metodo_cerrado_button = tk.Button(ceros_window, text="Método cerrado", command=lambda: metodo_selected(ceros_window, "cerrado"))
+    metodo_cerrado_button.pack()
 
-    btn_metodo_abierto = ttk.Button(ceros_window, text="Método Abierto", command=metodo_abierto)
-    btn_metodo_abierto.pack(expand=True)
+    metodo_abierto_button = tk.Button(ceros_window, text="Método abierto", command=lambda: metodo_selected(ceros_window, "abierto"))
+    metodo_abierto_button.pack()
 
-    # Botón para regresar al menú principal
-    btn_regresar = ttk.Button(ceros_window, text="Regresar al Menú Principal",
-                              command=lambda: regresar_al_menu(ceros_window))
-    btn_regresar.pack(expand=True)
+    # Agregar botón para regresar
+    regresar_button = tk.Button(ceros_window, text="Regresar", command=lambda: regresar(root, ceros_window))
+    regresar_button.pack()
 
+def metodo_selected(previous_window, metodo):
+    # Cerrar la ventana anterior
+    previous_window.destroy()
 
-def regresar_al_menu(window):
+    if metodo == "cerrado":
+        # Crear una nueva ventana para métodos cerrados
+        cerrado_window = tk.Toplevel()
+        cerrado_window.title("Métodos Cerrados")
+
+        # Modificar aquí el botón para Falsa Posición
+        falsa_pos_button = tk.Button(cerrado_window, text="Falsa Posición", command=abrir_falsa_posicion)
+        falsa_pos_button.pack()
+
+        biseccion_button = tk.Button(cerrado_window, text="Bisección", command=lambda: print("Bisección seleccionada"))
+        biseccion_button.pack()
+
+        # Agregar botón para regresar
+        regresar_button = tk.Button(cerrado_window, text="Regresar", command=lambda: regresar(root, cerrado_window))
+        regresar_button.pack()
+
+    elif metodo == "abierto":
+        # Implementar lógica para método abierto
+        print("Método abierto seleccionado")
+
+def regresar(main_window, current_window):
     # Cerrar la ventana actual y mostrar la ventana principal
-    window.destroy()
-    root.deiconify()
+    current_window.destroy()
+    main_window.deiconify()
 
-def metodo_cerrado(parent_window):
-    # Cerrar la ventana actual
-    parent_window.withdraw()
 
-    # Crear una nueva ventana para el método cerrado
-    cerrado_window = tk.Toplevel()
-    cerrado_window.title("Método Cerrado")
-    cerrado_window.geometry(parent_window.geometry())
+def ejecutar_falsa_posicion(funcion_str, a_val, b_val, tol_val):
+    x = sp.symbols('x')
+    funcion_str = funcion_str.replace('sp.', '')
 
-    # Crear botones para Falsa Posición y Bisección
-    btn_falsa_posicion = ttk.Button(cerrado_window, text="Falsa Posición", command=open_falsa_posicion)
-    btn_falsa_posicion.pack(expand=True)
+    try:
+        funcion = lambdify(x, parse_expr(funcion_str))
+        resultado = Posicion_falsa(funcion, a_val, b_val, tol_val)
+        return resultado
+    except Exception as e:
+        return str(e)
 
-    btn_biseccion = ttk.Button(cerrado_window, text="Bisección", command=biseccion)
-    btn_biseccion.pack(expand=True)
 
-    # Botón para regresar a la ventana de ceros
-    btn_regresar = ttk.Button(cerrado_window, text="Regresar a Métodos de Ceros", command=lambda: regresar_a_ceros(cerrado_window, parent_window))
-    btn_regresar.pack(expand=True)
-def falsa_posicion():
-    #Posicion_falsa()
-    print("Falsa Posición - Función aún no implementada")
-def open_falsa_posicion():
-    x, g, m, c, t, v = symbols('x g m c t v')
-    falsa_posicion_window = tk.Toplevel()
-    falsa_posicion_window.title("Falsa Posición")
-    falsa_posicion_window.geometry("300x200")
+def abrir_falsa_posicion():
+    def comando_ejecutar():
+        funcion_str = funcion_entry.get()
+        a_val = float(intervalo_a_entry.get())
+        b_val = float(intervalo_b_entry.get())
+        tol_val = float(tol_entry.get())
 
-    # Entrada para la función
-    tk.Label(falsa_posicion_window, text="Función:").pack()
-    funcion_entry = tk.Entry(falsa_posicion_window)
+        resultado = ejecutar_falsa_posicion(funcion_str, a_val, b_val, tol_val)
+        resultado_label.config(text=f"Resultado: {resultado}")
+
+    falsa_pos_window = tk.Toplevel()
+    falsa_pos_window.title("Falsa Posición")
+
+    tk.Label(falsa_pos_window, text="Función:").pack()
+    funcion_entry = tk.Entry(falsa_pos_window, width=50)
     funcion_entry.pack()
 
-    # Entrada para el intervalo
-    tk.Label(falsa_posicion_window, text="Intervalo Inicial:").pack()
-    intervalo_inicial_entry = tk.Entry(falsa_posicion_window)
-    intervalo_inicial_entry.pack()
+    tk.Label(falsa_pos_window, text="Intervalo a:").pack()
+    intervalo_a_entry = tk.Entry(falsa_pos_window, width=50)
+    intervalo_a_entry.pack()
 
-    tk.Label(falsa_posicion_window, text="Intervalo Final:").pack()
-    intervalo_final_entry = tk.Entry(falsa_posicion_window)
-    intervalo_final_entry.pack()
+    tk.Label(falsa_pos_window, text="Intervalo b:").pack()
+    intervalo_b_entry = tk.Entry(falsa_pos_window, width=50)
+    intervalo_b_entry.pack()
 
-    # Entrada para la tolerancia
-    tk.Label(falsa_posicion_window, text="Tolerancia:").pack()
-    tolerancia_entry = tk.Entry(falsa_posicion_window)
-    tolerancia_entry.pack()
+    tk.Label(falsa_pos_window, text="Tolerancia:").pack()
+    tol_entry = tk.Entry(falsa_pos_window, width=50)
+    tol_entry.pack()
 
-    # Botón para ejecutar el método
-    ttk.Button(falsa_posicion_window, text="Ejecutar Método", command=lambda: ejecutar_falsa_posicion(
-        funcion_entry.get(),
-        float(intervalo_inicial_entry.get()),
-        float(intervalo_final_entry.get()),
-        float(tolerancia_entry.get()))).pack()
+    ejecutar_button = tk.Button(falsa_pos_window, text="Ejecutar", command=comando_ejecutar)
+    ejecutar_button.pack()
 
-def ejecutar_falsa_posicion(funcion_str, intervalo_inicial, intervalo_final, tolerancia):
-    # Define las variables simbólicas
-    g, m, c, t, v = symbols('g m c t v')
-
-    # Reemplaza 'sp.exp' con 'exp' de sympy en la cadena de la función
-    funcion_str = funcion_str.replace("sp.exp", "exp")
-
-    # Convierte la cadena de la función en una expresión sympy
-    funcion = sympify(funcion_str)
-
-    # Define una función que evalúa esta expresión y la convierte en un valor numérico
-    def f(valor):
-        # Asegúrate de que la expresión sea evaluada numéricamente
-        return funcion.subs(t, valor).evalf()
-
-    # Llama al método de falsa posición
-    resultado = Posicion_falsa(f, intervalo_inicial, intervalo_final, tolerancia)
-    print("Resultado:", resultado)
+    resultado_label = tk.Label(falsa_pos_window, text="Resultado:")
+    resultado_label.pack()
 
 
-def biseccion():
-   # Biseccion()
-    print("Bisección - Función aún no implementada")
-# Define la función regresar_a_ceros
-def regresar_a_ceros(child_window, parent_window):
-    # Cerrar la ventana actual (método cerrado) y mostrar la ventana de ceros
-    child_window.destroy()
-    parent_window.deiconify()
-
-def metodo_abierto():
-    # Aquí puedes agregar la lógica para el método abierto
-    print("Método Abierto")
-def open_interpolacion():
-    # Aquí puedes agregar la lógica para abrir la interfaz de métodos de interpolación
-    print("Interpolación")
-
-def open_ecuaciones():
-    # Aquí puedes agregar la lógica para abrir la interfaz de ecuaciones
-    print("Ecuaciones")
-
-def open_integracion():
-    # Aquí puedes agregar la lógica para abrir la interfaz de métodos de integración
-    print("Integración")
-
+#----------------------------
 # Crear la ventana principal
 root = tk.Tk()
 root.title("Métodos Numéricos")
 
-# Configurar el tamaño de la ventana
+# Crear un botón y añadirlo a la ventana principal
+ceros_button = tk.Button(root, text="Ceros", command=open_ceros_window)
+ceros_button.pack()
+# Ejecutar el bucle principal de la ventana
 root.geometry("300x200")
-
-# Crear los botones
-btn_ceros = ttk.Button(root, text="Ceros", command=open_ceros)
-btn_ceros.pack(expand=True)
-
-btn_interpolacion = ttk.Button(root, text="Interpolación", command=open_interpolacion)
-btn_interpolacion.pack(expand=True)
-
-btn_ecuaciones = ttk.Button(root, text="Ecuaciones", command=open_ecuaciones)
-btn_ecuaciones.pack(expand=True)
-
-btn_integracion = ttk.Button(root, text="Integración", command=open_integracion)
-btn_integracion.pack(expand=True)
-
-# Iniciar el bucle principal de Tkinter
 root.mainloop()

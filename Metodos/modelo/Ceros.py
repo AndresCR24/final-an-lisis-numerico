@@ -14,7 +14,7 @@ def Biseccion(f,a,b,tol):
                 a=c
     return c
 
-"""
+
 def Posicion_falsa(f, a, b, tol):
     if f(a) * f(b) > 0:
         print("La función no cumple el teorema en el intervalo, busque otro intervalo")
@@ -28,31 +28,7 @@ def Posicion_falsa(f, a, b, tol):
             else:
                 a = c
         return c
-"""
-def Posicion_falsa(f, a, b, tol):
-    # Evaluar las expresiones simbólicas a valores numéricos
-    valor_fa = f(a).evalf()
-    valor_fb = f(b).evalf()
 
-    if valor_fa * valor_fb > 0:
-        print("La función no cumple el teorema en el intervalo, busque otro intervalo")
-        return None  # o manejar de otra forma
-    else:
-        while True:
-            valor_fa = f(a).evalf()
-            valor_fb = f(b).evalf()
-            c = a - (valor_fa * (a - b)) / (valor_fa - valor_fb)
-            valor_fc = f(c).evalf()
-
-            if np.abs(valor_fc) <= tol:
-                break
-
-            if valor_fa * valor_fc < 0:
-                b = c
-            else:
-                a = c
-
-        return c
 def Newton(f, x0, tol):
     df = sp.diff(f, x)
     newton = x - f / df
