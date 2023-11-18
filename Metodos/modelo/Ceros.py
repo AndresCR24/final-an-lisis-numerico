@@ -44,6 +44,7 @@ def Newton(f, x0, tol):
     print('La cantidad de iteraciones fueron: ', i)
     return x1
 
+"""
 def Secante(f, x0, x1, tol):
     x2 = x1-f(x1)*(x1-x0)/(f(x0)-f(x1))
     while(np.abs(x2-x1)>tol):
@@ -52,3 +53,19 @@ def Secante(f, x0, x1, tol):
         x2 = x1-f(x1)*(x0-x1)/(f(x0)-f(x1))
     print('La raiz de la funcion es: ', x2)
     return
+"""
+def Secante(f, x0, x1, tol):
+    try:
+        x2 = x1 - f(x1) * (x1 - x0) / (f(x0) - f(x1))
+        while np.abs(x2 - x1) > tol:
+            x0 = x1
+            x1 = x2
+            x2 = x1 - f(x1) * (x0 - x1) / (f(x0) - f(x1))
+        print('La raiz de la funcion es: ', x2)
+        return x2
+    except ZeroDivisionError:
+        print("Error: División por cero.")
+        return None
+    except TypeError as e:
+        print(f"Error de tipo: {e}")
+        return None
