@@ -3,15 +3,14 @@ from tkinter import messagebox
 import sympy as sp
 from sympy.parsing.sympy_parser import parse_expr
 from sympy import lambdify, exp, symbols, Matrix, sympify
-
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
-
 import pandas as pd
 from tkinter import Toplevel
 from Metodos.modelo.Ceros import *
 from Metodos.modelo.ecuaciones import *
+from Metodos.modelo.integracion import *
 
 def open_ceros_window():
     # Ocultar la ventana principal
@@ -322,7 +321,7 @@ def abrir_graficador():
     boton_graficar = tk.Button(graficador_window, text="Graficar", command=graficar_funcion)
     boton_graficar.pack()
 
-#Interpolacion
+#Ecuaciones
 def open_ecuaciones_window():
     # Ocultar la ventana principal
     root.withdraw()
@@ -805,6 +804,309 @@ def abrir_runge_kutta_2do_orden():
     resultado_label.pack()
 
 abrir_runge_kutta_2do_orden.resultado_df = None
+
+#Integracion
+def open_integracion_window():
+    # Ocultar la ventana principal
+    root.withdraw()
+
+    # Crear una nueva ventana para métodos
+    integracion_window = tk.Toplevel()
+    integracion_window.title("Métodos de Integración")
+
+    # Agregar botones para Método cerrado y Método abierto
+    metodo_integracion_button = tk.Button(integracion_window, text="Integracion", command=lambda: metodo_selected_integracion(integracion_window, "integrar"))
+    metodo_integracion_button.pack()
+
+   # metodo_grafico_button = tk.Button(ecuaciones_window, text="Grafica", command=lambda: metodo_selected(ecuaciones_window, "grafica"))
+    #metodo_grafico_button.pack()
+    # Agregar botón para regresar
+    regresar_button = tk.Button(integracion_window, text="Regresar", command=lambda: regresar(root, integracion_window))
+    regresar_button.pack()
+
+def metodo_selected_integracion(previous_window, metodo):
+    # Cerrar la ventana anterior
+    previous_window.destroy()
+
+    if metodo == "integrar":
+        # Crear una nueva ventana para métodos cerrados
+        cerrado_window = tk.Toplevel()
+        cerrado_window.title("Metodos de integracion")
+
+        # Modificar aquí el botón para Falsa Posición
+        trapecio = tk.Button(cerrado_window, text="Trapecio", command=abrir_trapecio)
+        trapecio.pack()
+
+        simpson_1_3 = tk.Button(cerrado_window, text="Simpson 1/3", command=abrir_simpson13)
+        simpson_1_3.pack()
+
+        simpson_3_8 = tk.Button(cerrado_window, text="Simpson 3/8", command=abrir_simpson38)
+        simpson_3_8.pack()
+
+        # Agregar botón para regresar
+        regresar_button = tk.Button(cerrado_window, text="Regresar", command=lambda: regresar(root, cerrado_window))
+        regresar_button.pack()
+
+#Metodo del trapecio
+def ejecutar_trapecio(funcion_str, a_val, b_val, n_val):
+    x = symbols('x')
+    funcion_str = funcion_str.replace('np.', '')
+
+    try:
+        funcion = lambdify(x, parse_expr(funcion_str))
+        resultado = Trapecio(funcion, a_val, b_val, n_val)
+        return resultado
+    except Exception as e:
+        return str(e)
+
+
+def abrir_trapecio():
+    def comando_ejecutar():
+        funcion_str = funcion_entry.get()
+        a_val = float(intervalo_a_entry.get())
+        b_val = float(intervalo_b_entry.get())
+        n_val = int(n_entry.get())
+
+        resultado = ejecutar_trapecio(funcion_str, a_val, b_val, n_val)
+        resultado_label.config(text=f"Resultado: {resultado}")
+
+    def graficar_funcion():
+        funcion_str = funcion_entry.get()
+        a_val = float(intervalo_a_entry.get())
+        b_val = float(intervalo_b_entry.get())
+        n_val = int(n_entry.get())
+
+        # Creando una nueva ventana para la gráfica
+        grafica_window = tk.Toplevel()
+        grafica_window.title("Gráfica del Método del Trapecio")
+
+        x = np.linspace(a_val, b_val, 100)
+        fx = lambdify(symbols('x'), parse_expr(funcion_str.replace('np.', '')))
+        y = np.array([fx(xi) for xi in x])
+
+        fig, ax = plt.subplots()
+        ax.plot(x, y, label='f(x)')
+
+        # Dibujando los trapecios
+        for i in range(n_val):
+            x0 = a_val + i * (b_val - a_val) / n_val
+            x1 = a_val + (i + 1) * (b_val - a_val) / n_val
+            y0, y1 = fx(x0), fx(x1)
+            ax.fill_between([x0, x1], [y0, y1], color='gray', alpha=0.5)
+
+        ax.set_title('Integral con Método del Trapecio')
+        ax.set_xlabel('x')
+        ax.set_ylabel('f(x)')
+        ax.legend()
+
+        # Embebiendo la figura en la ventana de Tkinter
+        canvas = FigureCanvasTkAgg(fig, master=grafica_window)
+        canvas_widget = canvas.get_tk_widget()
+        canvas_widget.pack(fill=tk.BOTH, expand=True)
+        canvas.draw()
+
+    trapecio_window = tk.Toplevel()
+    trapecio_window.title("Método del Trapecio")
+
+    tk.Label(trapecio_window, text="Función:").pack()
+    funcion_entry = tk.Entry(trapecio_window, width=50)
+    funcion_entry.pack()
+
+    tk.Label(trapecio_window, text="Intervalo a:").pack()
+    intervalo_a_entry = tk.Entry(trapecio_window, width=50)
+    intervalo_a_entry.pack()
+
+    tk.Label(trapecio_window, text="Intervalo b:").pack()
+    intervalo_b_entry = tk.Entry(trapecio_window, width=50)
+    intervalo_b_entry.pack()
+
+    tk.Label(trapecio_window, text="Número de subdivisiones (n):").pack()
+    n_entry = tk.Entry(trapecio_window, width=50)
+    n_entry.pack()
+
+    ejecutar_button = tk.Button(trapecio_window, text="Ejecutar", command=comando_ejecutar)
+    ejecutar_button.pack()
+
+    graficar_button = tk.Button(trapecio_window, text="Graficar", command=graficar_funcion)
+    graficar_button.pack()
+
+    resultado_label = tk.Label(trapecio_window, text="Resultado:")
+    resultado_label.pack()
+
+#Simpson 1/3
+def ejecutar_simpson13(funcion_str, a_val, b_val, n_val):
+    x = symbols('x')
+    funcion_str = funcion_str.replace('np.', '')
+
+    try:
+        funcion = lambdify(x, parse_expr(funcion_str))
+        resultado = simpson13(funcion, a_val, b_val, n_val)
+        return resultado
+    except Exception as e:
+        return str(e)
+
+
+def abrir_simpson13():
+    def comando_ejecutar():
+        funcion_str = funcion_entry.get()
+        a_val = float(intervalo_a_entry.get())
+        b_val = float(intervalo_b_entry.get())
+        n_val = int(n_entry.get())
+
+        resultado = ejecutar_simpson13(funcion_str, a_val, b_val, n_val)
+        resultado_label.config(text=f"Resultado: {resultado}")
+
+    def graficar_funcion():
+        funcion_str = funcion_entry.get()
+        a_val = float(intervalo_a_entry.get())
+        b_val = float(intervalo_b_entry.get())
+        n_val = int(n_entry.get())
+
+        # Creando una nueva ventana para la gráfica
+        grafica_window = tk.Toplevel()
+        grafica_window.title("Gráfica del Método de Simpson 1/3")
+
+        x = np.linspace(a_val, b_val, 100)
+        fx = lambdify(symbols('x'), parse_expr(funcion_str.replace('np.', '')))
+        y = np.array([fx(xi) for xi in x])
+
+        fig, ax = plt.subplots()
+        ax.plot(x, y, label='f(x)')
+
+        # Dibujando las parábolas
+        for i in range(0, n_val, 2):
+            x0 = a_val + i * (b_val - a_val) / n_val
+            x1 = a_val + (i + 1) * (b_val - a_val) / n_val
+            x2 = a_val + (i + 2) * (b_val - a_val) / n_val
+            y0, y1, y2 = fx(x0), fx(x1), fx(x2)
+            px = np.linspace(x0, x2, 10)
+            py = np.polyval(np.polyfit([x0, x1, x2], [y0, y1, y2], 2), px)
+            ax.fill_between(px, py, color='gray', alpha=0.5)
+
+        ax.set_title('Integral con Método de Simpson 1/3')
+        ax.set_xlabel('x')
+        ax.set_ylabel('f(x)')
+        ax.legend()
+
+        # Embebiendo la figura en la ventana de Tkinter
+        canvas = FigureCanvasTkAgg(fig, master=grafica_window)
+        canvas_widget = canvas.get_tk_widget()
+        canvas_widget.pack(fill=tk.BOTH, expand=True)
+        canvas.draw()
+
+    simpson13_window = tk.Toplevel()
+    simpson13_window.title("Método de Simpson 1/3")
+
+    tk.Label(simpson13_window, text="Función:").pack()
+    funcion_entry = tk.Entry(simpson13_window, width=50)
+    funcion_entry.pack()
+
+    tk.Label(simpson13_window, text="Intervalo a:").pack()
+    intervalo_a_entry = tk.Entry(simpson13_window, width=50)
+    intervalo_a_entry.pack()
+
+    tk.Label(simpson13_window, text="Intervalo b:").pack()
+    intervalo_b_entry = tk.Entry(simpson13_window, width=50)
+    intervalo_b_entry.pack()
+
+    tk.Label(simpson13_window, text="Número de subdivisiones (n):").pack()
+    n_entry = tk.Entry(simpson13_window, width=50)
+    n_entry.pack()
+
+    ejecutar_button = tk.Button(simpson13_window, text="Ejecutar", command=comando_ejecutar)
+    ejecutar_button.pack()
+
+    graficar_button = tk.Button(simpson13_window, text="Graficar", command=graficar_funcion)
+    graficar_button.pack()
+
+    resultado_label = tk.Label(simpson13_window, text="Resultado:")
+    resultado_label.pack()
+
+#Simpson 3/8
+def ejecutar_simpson38(funcion_str, a_val, b_val, n_val):
+    x = symbols('x')
+    funcion_str = funcion_str.replace('np.', '')
+
+    try:
+        funcion = lambdify(x, parse_expr(funcion_str))
+        resultado = simpson38(funcion, a_val, b_val, n_val)
+        return resultado
+    except Exception as e:
+        return str(e)
+
+
+def abrir_simpson38():
+    def comando_ejecutar():
+        funcion_str = funcion_entry.get()
+        a_val = float(intervalo_a_entry.get())
+        b_val = float(intervalo_b_entry.get())
+        n_val = int(n_entry.get())
+
+        resultado = ejecutar_simpson38(funcion_str, a_val, b_val, n_val)
+        resultado_label.config(text=f"Resultado: {resultado}")
+
+    def graficar_funcion():
+        funcion_str = funcion_entry.get()
+        a_val = float(intervalo_a_entry.get())
+        b_val = float(intervalo_b_entry.get())
+        n_val = int(n_entry.get())
+
+        # Creando una nueva ventana para la gráfica
+        grafica_window = tk.Toplevel()
+        grafica_window.title("Gráfica del Método de Simpson 3/8")
+
+        x = np.linspace(a_val, b_val, 100)
+        fx = lambdify(symbols('x'), parse_expr(funcion_str.replace('np.', '')))
+        y = np.array([fx(xi) for xi in x])
+
+        fig, ax = plt.subplots()
+        ax.plot(x, y, label='f(x)')
+
+        # Dibujando las secciones de Simpson 3/8
+        for i in range(0, n_val, 3):
+            x_vals = np.linspace(a_val + i * (b_val - a_val) / n_val,
+                                 a_val + (i + 3) * (b_val - a_val) / n_val, 10)
+            y_vals = fx(x_vals)
+            ax.fill_between(x_vals, y_vals, color='gray', alpha=0.5)
+
+        ax.set_title('Integral con Método de Simpson 3/8')
+        ax.set_xlabel('x')
+        ax.set_ylabel('f(x)')
+        ax.legend()
+
+        # Embebiendo la figura en la ventana de Tkinter
+        canvas = FigureCanvasTkAgg(fig, master=grafica_window)
+        canvas_widget = canvas.get_tk_widget()
+        canvas_widget.pack(fill=tk.BOTH, expand=True)
+        canvas.draw()
+
+    simpson38_window = tk.Toplevel()
+    simpson38_window.title("Método de Simpson 3/8")
+
+    tk.Label(simpson38_window, text="Función:").pack()
+    funcion_entry = tk.Entry(simpson38_window, width=50)
+    funcion_entry.pack()
+
+    tk.Label(simpson38_window, text="Intervalo a:").pack()
+    intervalo_a_entry = tk.Entry(simpson38_window, width=50)
+    intervalo_a_entry.pack()
+
+    tk.Label(simpson38_window, text="Intervalo b:").pack()
+    intervalo_b_entry = tk.Entry(simpson38_window, width=50)
+    intervalo_b_entry.pack()
+
+    tk.Label(simpson38_window, text="Número de subdivisiones (n):").pack()
+    n_entry = tk.Entry(simpson38_window, width=50)
+    n_entry.pack()
+
+    ejecutar_button = tk.Button(simpson38_window, text="Ejecutar", command=comando_ejecutar)
+    ejecutar_button.pack()
+
+    graficar_button = tk.Button(simpson38_window, text="Graficar", command=graficar_funcion)
+    graficar_button.pack()
+
+    resultado_label = tk.Label(simpson38_window, text="Resultado:")
+    resultado_label.pack()
 # Crear la ventana principal
 root = tk.Tk()
 root.title("Métodos Numéricos")
@@ -815,6 +1117,9 @@ ceros_button.pack()
 
 ecuaciones_button = tk.Button(root, text="Ecuaciones diferenciales", command=open_ecuaciones_window)
 ecuaciones_button.pack()
+
+integrales_button = tk.Button(root, text="Integrales", command=open_integracion_window)
+integrales_button.pack()
 # Ejecutar el bucle principal de la ventana
 root.geometry("300x200")
 root.mainloop()
