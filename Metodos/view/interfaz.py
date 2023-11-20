@@ -1,13 +1,13 @@
 import tkinter as tk
-from tkinter import messagebox
 import sympy as sp
-from sympy.parsing.sympy_parser import parse_expr
-from sympy import lambdify, exp, symbols, Matrix, sympify
 import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from matplotlib.figure import Figure
 import pandas as pd
 from tkinter import Toplevel
+from tkinter import messagebox
+from sympy.parsing.sympy_parser import parse_expr
+from sympy import lambdify, exp, symbols, Matrix, sympify
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
 from Metodos.modelo.Ceros import *
 from Metodos.modelo.ecuaciones import *
 from Metodos.modelo.integracion import *
@@ -16,11 +16,11 @@ def open_ceros_window():
     # Ocultar la ventana principal
     root.withdraw()
 
-    # Crear una nueva ventana para métodos de ceros
+    #Crear una nueva ventana para los metodos de ceros -> abiertos cerrados
     ceros_window = tk.Toplevel()
     ceros_window.title("Métodos de Ceros")
 
-    # Agregar botones para Método cerrado y Método abierto
+    #Agregar botones para Método cerrado y Método abierto
     metodo_cerrado_button = tk.Button(ceros_window, text="Método cerrado", command=lambda: metodo_selected(ceros_window, "cerrado"), width=28)
     metodo_cerrado_button.pack()
 
@@ -29,27 +29,28 @@ def open_ceros_window():
 
     metodo_grafico_button = tk.Button(ceros_window, text="Grafica", command=lambda: metodo_selected(ceros_window, "grafica"), width=28)
     metodo_grafico_button.pack()
-    # Agregar botón para regresar
+    #Boton para regresar
     regresar_button = tk.Button(ceros_window, text="Regresar", command=lambda: regresar(root, ceros_window), width=28)
     regresar_button.pack()
 
 def metodo_selected(previous_window, metodo):
-    # Cerrar la ventana anterior
+    #Cerrar la ventana anterior para que solo se tenga una ventana con el menu
     previous_window.destroy()
 
     if metodo == "cerrado":
-        # Crear una nueva ventana para métodos cerrados
+        #Generar una nueva ventana para métodos cerrados
         cerrado_window = tk.Toplevel()
         cerrado_window.title("Métodos Cerrados")
 
-        # Modificar aquí el botón para Falsa Posición
+        #Boton de Falsa posicion
         falsa_pos_button = tk.Button(cerrado_window, text="Falsa Posición", command=abrir_falsa_posicion, width=28)
         falsa_pos_button.pack()
 
+        #Boton de Falsa Biseccion
         biseccion_button = tk.Button(cerrado_window, text="Bisección", command=abrir_biseccion, width=28)
         biseccion_button.pack()
 
-        # Agregar botón para regresar
+        #boton regresar
         regresar_button = tk.Button(cerrado_window, text="Regresar", command=lambda: regresar(root, cerrado_window), width=28)
         regresar_button.pack()
 
@@ -57,32 +58,38 @@ def metodo_selected(previous_window, metodo):
         abierto_window = tk.Toplevel()
         abierto_window.title("Metodos Abiertos")
 
+        #Boton Newton
         newton_button = tk.Button(abierto_window, text="Newton", command= abrir_newton, width=28)
         newton_button.pack()
 
+        #Boton Secante
         secante_button = tk.Button(abierto_window, text="Secante", command= abrir_secante, width=28)
         secante_button.pack()
 
+        #Boton Regresar
         regresar_button = tk.Button(abierto_window, text="Regresar", command=lambda: regresar(root, abierto_window), width=28)
         regresar_button.pack()
+
     elif metodo == "grafica":
         grafica_window = tk.Toplevel()
         grafica_window.title("Grafica")
 
         grafica_button = tk.Button(grafica_window, text="Realizar grafica", command= abrir_graficador, width=28)
         grafica_button.pack()
+
         regresar_button = tk.Button(grafica_window, text="Regresar", command=lambda: regresar(root, grafica_window), width=28)
         regresar_button.pack()
 
 
 def regresar(main_window, current_window):
-    # Cerrar la ventana actual y mostrar la ventana principal
+    #Cerrar la ventana actual y mostrar la ventana principal
     current_window.destroy()
     main_window.deiconify()
 
 #Metodo Cerrado Falsa Posición
 def ejecutar_falsa_posicion(funcion_str, a_val, b_val, tol_val):
     x = sp.symbols('x')
+    #Remplazar el sp. por espacio vacio para poder ingresar la funcion normalmente
     funcion_str = funcion_str.replace('sp.', '')
 
     try:
@@ -100,12 +107,14 @@ def abrir_falsa_posicion():
         b_val = float(intervalo_b_entry.get())
         tol_val = float(tol_entry.get())
 
+        #Llamar el metodo de falsa posicion de los modelos
         resultado = ejecutar_falsa_posicion(funcion_str, a_val, b_val, tol_val)
         resultado_label.config(text=f"Resultado: {resultado}")
 
     falsa_pos_window = tk.Toplevel()
     falsa_pos_window.title("Falsa Posición")
 
+    #Pedir los valores para ejecutar el modelo por la interfaz grafica
     tk.Label(falsa_pos_window, text="Función:").pack()
     funcion_entry = tk.Entry(falsa_pos_window, width=50)
     funcion_entry.pack()
@@ -127,6 +136,7 @@ def abrir_falsa_posicion():
 
     resultado_label = tk.Label(falsa_pos_window, text="Resultado:")
     resultado_label.pack()
+
 #Metodo cerrado Biseccion
 def ejecutar_biseccion(funcion_str, a_val, b_val, tol_val):
     x = sp.symbols('x')
@@ -227,7 +237,7 @@ def ejecutar_secante(funcion_str, x0, x1, tol_val):
     resultado = Secante(funcion_numerica, x0, x1, tol_val)
     return resultado
 
-# Función para abrir la ventana del método de la Secante
+#funcion para abrir método de la Secante
 def abrir_secante():
     def comando_ejecutar():
         funcion_str = funcion_entry.get()
@@ -303,7 +313,7 @@ def graficar_funcion():
     except Exception as e:
         print("Error al graficar la función:", e)
 
-# Función para abrir la ventana de graficación
+#Función para abrir la ventana de graficación
 def abrir_graficador():
     graficador_window = tk.Toplevel()
     graficador_window.title("Graficador de Funciones")
@@ -329,33 +339,34 @@ def open_ecuaciones_window():
     # Ocultar la ventana principal
     root.withdraw()
 
-    # Crear una nueva ventana para métodos
+    #Crear una nueva ventana para métodos
     ecuaciones_window = tk.Toplevel()
     ecuaciones_window.title("Métodos de Ecuaciones diferenciales")
 
-    # Agregar botones para Método cerrado y Método abierto
+    #Agregar botones para Método cerrado y Método abierto
     metodo_edo_button = tk.Button(ecuaciones_window, text="Ecuaciones diferenciales de orden 1", command=lambda: metodo_selected_ecuaciones(ecuaciones_window, "orden1"), width=28)
     metodo_edo_button.pack()
 
     metodo_edo2_button = tk.Button(ecuaciones_window, text="Ecuaciones diferenciales de orden 2", command=lambda: metodo_selected_ecuaciones(ecuaciones_window, "orden2"), width=28)
     metodo_edo2_button.pack()
 
-   # metodo_grafico_button = tk.Button(ecuaciones_window, text="Grafica", command=lambda: metodo_selected(ecuaciones_window, "grafica"))
+   #metodo_grafico_button = tk.Button(ecuaciones_window, text="Grafica", command=lambda: metodo_selected(ecuaciones_window, "grafica"))
     #metodo_grafico_button.pack()
-    # Agregar botón para regresar
+
+    #Agregar botón para regresar
     regresar_button = tk.Button(ecuaciones_window, text="Regresar", command=lambda: regresar(root, ecuaciones_window), width=28)
     regresar_button.pack()
 
 def metodo_selected_ecuaciones(previous_window, metodo):
-    # Cerrar la ventana anterior
+    #Cerrar la ventana anterior
     previous_window.destroy()
 
     if metodo == "orden1":
-        # Crear una nueva ventana para métodos cerrados
+        #Crear una nueva ventana para métodos cerrados
         cerrado_window = tk.Toplevel()
         cerrado_window.title("Ecuaciones diferenciales orden 1")
 
-        # Modificar aquí el botón para Falsa Posición
+        #Modificar aquí el botón para Falsa Posición
         euler_pos_button = tk.Button(cerrado_window, text="Euler", command=abrir_euler_ecuacion, width=28)
         euler_pos_button.pack()
 
@@ -363,7 +374,7 @@ def metodo_selected_ecuaciones(previous_window, metodo):
         runge_kutta_orden1.pack()
 
 
-        # Agregar botón para regresar
+        #Agregar botón para regresar
         regresar_button = tk.Button(cerrado_window, text="Regresar", command=lambda: regresar(root, cerrado_window), width=28)
         regresar_button.pack()
 
@@ -383,15 +394,16 @@ def metodo_selected_ecuaciones(previous_window, metodo):
 
 #Euler Ecuaciones diferenciales orden 1
 def ejecutar_euler_ecuacion(funcion_str, a_val, b_val, h, co_val):
-    t, y = symbols('t y')  # Definimos dos símbolos para t y y
-    # Reemplazamos 'np.' por nada ya que SymPy usa 'exp' directamente
-    funcion_str = funcion_str.replace('np.', '')  # Si el usuario usa 'np.exp', lo cambiamos solo a 'exp'
+    t, y = symbols('t y')  #Definimos dos símbolos para t y y
+
+    #Reemplazamos 'np.' por nada ya que SymPy usa 'exp' directamente
+    funcion_str = funcion_str.replace('np.', '')  #Si el usuario usa 'np.exp', lo cambiamos solo a 'exp'
 
     try:
-        # Parseamos la cadena de la función asegurándonos de que es una expresión de SymPy válida
+        #Parseamos la cadena de la función asegurándonos de que es una expresión de SymPy válida
         funcion = lambdify((t, y), parse_expr(funcion_str), modules='numpy')  # Convertimos la cadena en una función
         t_values, y_values = Euler(funcion, a_val, b_val, h, co_val)  # Llamamos a la función Euler
-        # Crear un DataFrame con los resultados
+        #Crear un DataFrame con los resultados
         data = {'Time': t_values, 'Euler_Aproximacion': y_values}
         resultado_df = pd.DataFrame(data)
         return resultado_df
@@ -416,27 +428,27 @@ def abrir_euler_ecuacion():
             abrir_euler_ecuacion.resultado_df = resultado_df
 
     def graficar_resultados():
-        # Accedemos a los resultados almacenados previamente
+        #Accedemos a los resultados almacenados previamente
         df = abrir_euler_ecuacion.resultado_df
         if df is not None and not df.empty:
-            # Creamos una figura de matplotlib
+            #Creamos una figura de matplotlib
             fig = Figure(figsize=(6, 4), dpi=100)
             plot = fig.add_subplot(1, 1, 1)
-            # Graficamos los resultados y añadimos un título al gráfico
+            #Graficamos los resultados y añadimos un título al gráfico
             plot.plot(df['Time'], df['Euler_Aproximacion'], '-o', color='blue')
             plot.set_title('Aproximación Euler')  # Título del gráfico
 
-            # Creamos una ventana de Tkinter para el gráfico
+            #Creamos una ventana de Tkinter para el gráfico
             grafico_window = tk.Toplevel()
             grafico_window.title("Gráfico de Resultados Euler")
             canvas = FigureCanvasTkAgg(fig, master=grafico_window)
             canvas.draw()
 
-            # Creamos un widget de Canvas de Tkinter con el gráfico de matplotlib y lo empaquetamos para que se expanda y llene
+            #Creamos un widget de Canvas de Tkinter con el gráfico de matplotlib y lo empaquetamos para que se expanda y llene
             widget_canvas = canvas.get_tk_widget()
             widget_canvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
-            # Para que el gráfico se reajuste cuando la ventana cambia de tamaño, vinculamos el cambio de tamaño de la ventana con una actualización del canvas
+            #Para que el gráfico se reajuste cuando la ventana cambia de tamaño, vinculamos el cambio de tamaño de la ventana con una actualización del canvas
             def on_resize(event):
                 canvas.draw()
 
@@ -478,15 +490,14 @@ def abrir_euler_ecuacion():
     ejecutar_button = tk.Button(euler_window, text="Ejecutar", command=comando_ejecutar)
     ejecutar_button.pack()
 
+    # Botón para graficar los resultados
     graficar_button = tk.Button(euler_window, text="Graficar", command=graficar_resultados)
     graficar_button.pack()
 
     resultado_label = tk.Label(euler_window, text="Resultado:")
     resultado_label.pack()
 
-    # Botón para graficar los resultados
-
-
+    #Botón para graficar los resultados
     #grafico_button = tk.Button(euler_window, text="Grafico", command=comando_grafico_euler)
     #grafico_button.pack()
 
@@ -494,12 +505,12 @@ abrir_euler_ecuacion.resultado_df = None
 
 #Runge kutta Ecuaciones dieferenciales orden 1
 def ejecutar_runge_kutta(funcion_str, a_val, b_val, h, co_val):
-    t, y = symbols('t y')  # Define dos símbolos para t y y
-    funcion = lambdify((t, y), parse_expr(funcion_str), modules='numpy')  # Convierte la cadena en una función
+    t, y = symbols('t y')  #Define dos símbolos para t y y
+    funcion = lambdify((t, y), parse_expr(funcion_str), modules='numpy')  #Convierte la cadena en una función
 
     try:
-        t_values, y_values = runge_kutta(funcion, a_val, b_val, h, co_val)  # Llama a la función de Runge-Kutta
-        # Crea un DataFrame con los resultados
+        t_values, y_values = runge_kutta(funcion, a_val, b_val, h, co_val)  #Llama a la función de Runge-Kutta
+        #Crea un DataFrame con los resultados
         data = {'Time': t_values, 'Runge_Kutta_Aproximacion': y_values}
         resultado_df = pd.DataFrame(data)
         return resultado_df
@@ -587,11 +598,11 @@ def abrir_runge_kutta_ecuacion():
 abrir_runge_kutta_ecuacion.resultado_df = None
 #Euler para ecuaciones diferenciales de orden 2
 def ejecutar_euler_2do_orden(f1_str, f2_str, a_val, b_val, h, co_val):
-    t, x, y = symbols('t x y')  # Definimos tres símbolos para t, x, y
+    t, x, y = symbols('t x y')  #Definimos tres símbolos para t, x, y
     f1_expr = sympify(f1_str.replace('np.', ''))
     f2_expr = sympify(f2_str.replace('np.', ''))
 
-    # Convertimos las expresiones en funciones
+    #Convertimos las expresiones en funciones
     f1_func = lambdify((t, x, y), f1_expr, modules='numpy')
     f2_func = lambdify((t, x, y), f2_expr, modules='numpy')
 
@@ -600,7 +611,7 @@ def ejecutar_euler_2do_orden(f1_str, f2_str, a_val, b_val, h, co_val):
 
     try:
         t_values, y_values = Euler(f, a_val, b_val, h, np.array(co_val))
-        # Crear un DataFrame con los resultados
+        #Crear un DataFrame con los resultados
         data = {'Time': t_values, 'f1(t)': [y[0] for y in y_values], "f2(t)": [y[1] for y in y_values]}
         resultado_df = pd.DataFrame(data)
         return resultado_df
@@ -655,7 +666,7 @@ def abrir_euler_2do_orden():
         resultado_window.title("Resultados de Euler")
         text = tk.Text(resultado_window)
         text.pack()
-        text.insert(tk.END, df.to_string(index=False))  # Convertir DataFrame a string para mostrarlo
+        text.insert(tk.END, df.to_string(index=False))  #Convertir DataFrame a string para mostrarlo
 
     euler_window = tk.Toplevel()
     euler_window.title("Método de Euler para Ecuaciones de Segundo Orden")
@@ -691,7 +702,7 @@ def abrir_euler_2do_orden():
     ejecutar_button = tk.Button(euler_window, text="Ejecutar", command=comando_ejecutar)
     ejecutar_button.pack()
 
-    # Botón para graficar los resultados
+    #Botón para graficar los resultados
     graficar_button = tk.Button(euler_window, text="Graficar", command=graficar_resultados)
     graficar_button.pack()
 
@@ -817,17 +828,18 @@ def open_integracion_window():
     # Ocultar la ventana principal
     root.withdraw()
 
-    # Crear una nueva ventana para métodos
+    #Crear una nueva ventana para métodos
     integracion_window = tk.Toplevel()
     integracion_window.title("Métodos de Integración")
 
-    # Agregar botones para Método cerrado y Método abierto
+    #Agregar botones para Método cerrado y Método abierto
     metodo_integracion_button = tk.Button(integracion_window, text="Integracion", command=lambda: metodo_selected_integracion(integracion_window, "integrar"), width=28)
     metodo_integracion_button.pack()
 
-   # metodo_grafico_button = tk.Button(ecuaciones_window, text="Grafica", command=lambda: metodo_selected(ecuaciones_window, "grafica"))
+   #metodo_grafico_button = tk.Button(ecuaciones_window, text="Grafica", command=lambda: metodo_selected(ecuaciones_window, "grafica"))
     #metodo_grafico_button.pack()
-    # Agregar botón para regresar
+
+    #Agregar botón para regresar
     regresar_button = tk.Button(integracion_window, text="Regresar", command=lambda: regresar(root, integracion_window), width=28)
     regresar_button.pack()
 
@@ -836,11 +848,11 @@ def metodo_selected_integracion(previous_window, metodo):
     previous_window.destroy()
 
     if metodo == "integrar":
-        # Crear una nueva ventana para métodos cerrados
+        #Crear una nueva ventana para métodos cerrados
         cerrado_window = tk.Toplevel()
         cerrado_window.title("Metodos de integracion")
 
-        # Modificar aquí el botón para Falsa Posición
+        #Modificar aquí el botón para Falsa Posición
         trapecio = tk.Button(cerrado_window, text="Trapecio", command=abrir_trapecio, width=28)
         trapecio.pack()
 
@@ -850,7 +862,7 @@ def metodo_selected_integracion(previous_window, metodo):
         simpson_3_8 = tk.Button(cerrado_window, text="Simpson 3/8", command=abrir_simpson38, width=28)
         simpson_3_8.pack()
 
-        # Agregar botón para regresar
+        #Agregar botón para regresar
         regresar_button = tk.Button(cerrado_window, text="Regresar", command=lambda: regresar(root, cerrado_window), width=28)
         regresar_button.pack()
 
@@ -894,7 +906,7 @@ def abrir_trapecio():
         fig, ax = plt.subplots()
         ax.plot(x, y, label='f(x)')
 
-        # Dibujando los trapecios
+        #Dibujando los trapecios
         for i in range(n_val):
             x0 = a_val + i * (b_val - a_val) / n_val
             x1 = a_val + (i + 1) * (b_val - a_val) / n_val
@@ -906,7 +918,7 @@ def abrir_trapecio():
         ax.set_ylabel('f(x)')
         ax.legend()
 
-        # Embebiendo la figura en la ventana de Tkinter
+        #Embebiendo la figura en la ventana de Tkinter
         canvas = FigureCanvasTkAgg(fig, master=grafica_window)
         canvas_widget = canvas.get_tk_widget()
         canvas_widget.pack(fill=tk.BOTH, expand=True)
@@ -969,7 +981,7 @@ def abrir_simpson13():
         b_val = float(intervalo_b_entry.get())
         n_val = int(n_entry.get())
 
-        # Creando una nueva ventana para la gráfica
+        #Creando una nueva ventana para la gráfica
         grafica_window = tk.Toplevel()
         grafica_window.title("Gráfica del Método de Simpson 1/3")
 
@@ -980,7 +992,7 @@ def abrir_simpson13():
         fig, ax = plt.subplots()
         ax.plot(x, y, label='f(x)')
 
-        # Dibujando las parábolas
+        #Dibujando las parábolas
         for i in range(0, n_val, 2):
             x0 = a_val + i * (b_val - a_val) / n_val
             x1 = a_val + (i + 1) * (b_val - a_val) / n_val
@@ -995,7 +1007,7 @@ def abrir_simpson13():
         ax.set_ylabel('f(x)')
         ax.legend()
 
-        # Embebiendo la figura en la ventana de Tkinter
+        #Embebiendo la figura en la ventana de Tkinter
         canvas = FigureCanvasTkAgg(fig, master=grafica_window)
         canvas_widget = canvas.get_tk_widget()
         canvas_widget.pack(fill=tk.BOTH, expand=True)
@@ -1058,7 +1070,7 @@ def abrir_simpson38():
         b_val = float(intervalo_b_entry.get())
         n_val = int(n_entry.get())
 
-        # Creando una nueva ventana para la gráfica
+        #Creando una nueva ventana para la gráfica
         grafica_window = tk.Toplevel()
         grafica_window.title("Gráfica del Método de Simpson 3/8")
 
@@ -1069,7 +1081,7 @@ def abrir_simpson38():
         fig, ax = plt.subplots()
         ax.plot(x, y, label='f(x)')
 
-        # Dibujando las secciones de Simpson 3/8
+        #Dibujando las secciones de Simpson 3/8
         for i in range(0, n_val, 3):
             x_vals = np.linspace(a_val + i * (b_val - a_val) / n_val,
                                  a_val + (i + 3) * (b_val - a_val) / n_val, 10)
@@ -1081,7 +1093,7 @@ def abrir_simpson38():
         ax.set_ylabel('f(x)')
         ax.legend()
 
-        # Embebiendo la figura en la ventana de Tkinter
+        #Embebiendo la figura en la ventana de Tkinter
         canvas = FigureCanvasTkAgg(fig, master=grafica_window)
         canvas_widget = canvas.get_tk_widget()
         canvas_widget.pack(fill=tk.BOTH, expand=True)
@@ -1115,16 +1127,17 @@ def abrir_simpson38():
     resultado_label = tk.Label(simpson38_window, text="Resultado:")
     resultado_label.pack()
 
+#Funcion para ejecutar la interfaz desde el archivo app.py
 def main():
     root = tk.Tk()
-    # ... configuración de tu interfaz ...
+    #configuración de tu interfaz ...
     root.mainloop()
 
-# Crear la ventana principal
+#Crear la ventana principal
 root = tk.Tk()
 root.title("Métodos Numéricos")
 
-# Crear un botón y añadirlo a la ventana principal
+#Crear un botón y añadirlo a la ventana principal
 ceros_button = tk.Button(root, text="Ceros", command=open_ceros_window, width=28)
 ceros_button.pack()
 
@@ -1133,6 +1146,6 @@ ecuaciones_button.pack()
 
 integrales_button = tk.Button(root, text="Integrales", command=open_integracion_window, width=28)
 integrales_button.pack()
-# Ejecutar el bucle principal de la ventana
+#Ejecutar el bucle principal de la ventana
 root.geometry("300x200")
 root.mainloop()
