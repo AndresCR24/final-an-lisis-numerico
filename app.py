@@ -1,2 +1,4 @@
+from Metodos.view import interfaz
+
 if __name__ == '__main__':
-    pass
+    interfaz.main()
